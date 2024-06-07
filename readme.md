@@ -29,6 +29,13 @@ This creates a route accessible at `/reverse` on the web server. This will execu
 
 So this would be the equivalent of `cat file | rev` being executed on the host. The client is passing the file, but can't control the execution of `rev`.
 
+The full argument format is:
+
+* %s - pass a file via standard input
+* %f - pass a file via a path
+* %p - pass a generic parameter as a switch (can't have spaces)
+* <raw string> - pass the exact parameter
+
 ## Execution Wrapper
 
 The included `jollyexec_wrapper.sh` is a simple shell script that wraps this execution for you, to make it easier to invoke on the client. It's a shell script to reduce the dependencies needed in the container (i.e. avoiding the need for a full python interpreter).
