@@ -2,7 +2,7 @@
 
 ![image](https://github.com/singe/jollyexec/assets/1150684/ec2adbf0-05e2-4eb0-9131-bfee386a4a6b)
 
-jollyexec is an execution proxy - it presents a configurable web server that will execute commands, and return their output. But, it has some ideas about security.
+jollyexec is an execution proxy - it presents a configurable web server that will execute commands, and return their output. But, it has some ideas about security. It could also be called an API wrapper for unix command execution.
 
 It solves some of the hassles of passing files to a command through an HTTP server by doing things like allowing you to specify if a file should be sent as stdin to a process, or whether it needs to be stuck into a temporary file and the path passed to the file.
 
@@ -34,7 +34,7 @@ The full argument format is:
 * %s - pass a file via standard input
 * %f - pass a file via a path
 * %p - pass a generic parameter as a switch (can't have spaces)
-* <raw string> - pass the exact parameter
+* "raw_string" - pass the exact parameter "raw_string (also can't have spaces)"
 
 ## Execution Wrapper
 
@@ -53,6 +53,14 @@ So an example invocation for the above config file would be:
 `./jollyexec_wrapper.sh reverse -f file.txt`
 
 There's no need to use the wrapper if you don't want to, and you can just deal with the JSON directly.
+
+## Security Considerations
+
+The intention is to limit the flexibility of what the client can cause to execute as much as possible. So while it's possible to execute `bash -c` and allow the client to pass whatever it wants as a parameter (i.e. %p), that defeats much of the point. Whenever flexibility is desired, create a new route, and hardcode the required switches, rather than making it variable for the client.
+
+By way of problematic example, let's say you want to reflect a file back to the client using `cat`, but you'd like to have two options, one outputs the file as it would appear, and the other escapes control characters (i.e. the `-e` switch to cat). One could allow a parameter to be submitted by the client where the client could include the `-e` switch or not. However, this would allow *any* input, such that the client could pass in `/etc/passwd` and get the contents of the passwd file. Instead create two different routes one which hardcodes the `-e` switch and the other which hardcodes the `-v` switch.
+
+There's a TODO below about creating a filter for parameters.
 
 ## Requests and Responses
 
@@ -88,3 +96,7 @@ Here's an example:
 ## The Name
 
 Comes from a Rumjacks song https://www.youtube.com/watch?v=sAmgZkPnOS4
+
+## TODO
+
+* Create a regex filter for parameters to limit what values a client can submit, or at least force someone to consider it.
