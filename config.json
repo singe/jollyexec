@@ -1,0 +1,19 @@
+{
+  "routes": [
+    {
+      "path": "reverse",
+      "command": "rev",
+      "args": ["%s"]
+    },
+    {
+      "path": "merge",
+      "command": "cat",
+      "args": ["%s","-e", "%f"]
+    },
+    {
+      "path": "sort",
+      "command": "sort",
+      "args": ["-u","%p"]
+    }
+  ]
+}
