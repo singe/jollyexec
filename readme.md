@@ -1,5 +1,7 @@
 # The Jolly Executioner
 
+![image](https://github.com/singe/jollyexec/assets/1150684/ec2adbf0-05e2-4eb0-9131-bfee386a4a6b)
+
 jollyexec is an execution proxy - it presents a configurable web server that will execute commands, and return their output. But, it has some ideas about security.
 
 It solves some of the hassles of passing files to a command through an HTTP server by doing things like allowing you to specify if a file should be sent as stdin to a process, or whether it needs to be stuck into a temporary file and the path passed to the file.
@@ -75,3 +77,7 @@ Here's an example:
 ```
 {"exit_code":0,"stderr":"Zm9vCg==","stdout":"YmFyCg=="}
 ```
+
+## The Name
+
+Comes from a Rumjacks song https://www.youtube.com/watch?v=sAmgZkPnOS4
