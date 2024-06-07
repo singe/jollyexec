@@ -1,6 +1,6 @@
 # The Jolly Executioner
 
-<img width="397" alt="image" src="https://github.com/singe/jollyexec/assets/1150684/41ec284d-4bd2-487b-87d5-aa65180ab820">
+<img width="321" alt="image" src="https://github.com/singe/jollyexec/assets/1150684/a1c0833d-3c84-46d1-be79-e17234efab70">
 
 jollyexec is an execution proxy - it presents a configurable web server that will execute commands, and return their output. But, it has some ideas about security. It could also be called an API wrapper for unix command execution.
 
