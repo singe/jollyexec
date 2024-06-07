@@ -100,3 +100,4 @@ Comes from a Rumjacks song https://www.youtube.com/watch?v=sAmgZkPnOS4
 ## TODO
 
 * Create a regex filter for parameters to limit what values a client can submit, or at least force someone to consider it.
+* Automatically generate linux sandbox profile based on the execution profile as described by @staaldraad here https://infosec.exchange/@staaldraad/112575264607974109
