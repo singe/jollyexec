@@ -8,12 +8,15 @@
     {
       "path": "merge",
       "command": "cat",
-      "args": ["%s","-e", "%f"]
+      "args": ["%s", "-e", "%f"]
     },
     {
       "path": "sort",
       "command": "sort",
-      "args": ["-u","%p"]
+      "args": ["-u", "%p"]
     }
-  ]
+  ],
+  "user": "nobody",
+  "jollyexec_location": "/usr/bin/jollyexec",
+  "write_paths": ["/tmp"]
 }

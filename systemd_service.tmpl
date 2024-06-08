@@ -1,0 +1,17 @@
+[Unit]
+Description=jollyexec generated unit
+After=network-online.target
+
+[Service]
+Type=exec
+Restart=on-failure
+User={user}
+ReadOnlyPaths=/
+ReadWritePaths={write_paths}
+ProtectSystem=strict
+NoExecPaths=/
+ExecPaths={exec_paths} /usr/lib /usr/lib64
+ExecStart={jollyexec_location}
+
+[Install]
+WantedBy=multi-user.target

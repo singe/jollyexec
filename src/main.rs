@@ -7,6 +7,7 @@ use base64::engine::Engine as _;
 use bytes::Bytes;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::env;
 use std::io::Write;
 use std::process::Stdio;
 use tempfile::NamedTempFile;
@@ -20,6 +21,9 @@ use warp::{
 #[derive(Deserialize, Serialize, Clone)]
 struct Config {
     routes: Vec<RouteConfig>,
+    user: String,
+    jollyexec_location: String,
+    write_paths: Vec<String>,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -110,8 +114,8 @@ async fn handle_and_execute_files(
             _ => args.push(option.to_string()),
         }
     }
-    
-    println!("Executing command: {command}, with arguments {:?}",&args);
+
+    println!("Executing command: {command}, with arguments {:?}", &args);
 
     let mut child = cmd
         .args(&args)
@@ -177,34 +181,43 @@ fn generate_curl_commands(config: &Config) -> String {
                     files_data += &format!("    {{\"filename\": \"file{}.txt\", \"data\": \"'\"$(base64 -w0 file{}.txt)\"'\"}},\n", file_count, file_count);
                     file_count += 1;
                     has_files = true;
-                },
+                }
                 "%p" => {
                     params_data += &format!("    \"param{}\",\n", file_count);
                     file_count += 1;
                     has_params = true;
-                },
+                }
                 _ => {}
             }
         }
 
         if has_files {
-            files_data.pop(); files_data.pop(); // Remove the last comma and newline
+            files_data.pop();
+            files_data.pop(); // Remove the last comma and newline
             files_data += "\n  ],\n";
         } else {
             files_data.clear();
         }
 
         if has_params {
-            params_data.pop(); params_data.pop(); // Remove the last comma and newline
+            params_data.pop();
+            params_data.pop(); // Remove the last comma and newline
             params_data += "\n  ]\n";
         } else {
             params_data.clear();
         }
 
         data += "{\n";
-        if has_files { data += &files_data; }
-        if has_params { data += &params_data; }
-        if data.ends_with(",\n") { data.pop(); data.pop(); } // Clean up any trailing commas
+        if has_files {
+            data += &files_data;
+        }
+        if has_params {
+            data += &params_data;
+        }
+        if data.ends_with(",\n") {
+            data.pop();
+            data.pop();
+        } // Clean up any trailing commas
         data += "}";
 
         output.push_str(&format!("curl -X POST http://localhost:3030/{} \\\n     -H \"Content-Type: application/json\" \\\n     -d '{}'\n", route.path, data));
@@ -218,6 +231,22 @@ fn load_config(file_path: &str) -> Result<Config, Box<dyn std::error::Error>> {
     Ok(config)
 }
 
+fn generate_service_config(config: &Config) -> String {
+    return format!(
+        include_str!("../systemd_service.tmpl"),
+        user = config.user,
+        exec_paths = config
+            .routes
+            .to_owned()
+            .into_iter()
+            .map(|route| route.path)
+            .collect::<Vec<_>>()
+            .join(" "),
+        write_paths = config.write_paths.join(" "),
+        jollyexec_location = config.jollyexec_location
+    );
+}
+
 #[tokio::main]
 async fn main() {
     pretty_env_logger::init();
@@ -225,16 +254,19 @@ async fn main() {
     // Load the configuration
     let config = load_config("config.json").expect("Failed to load config");
 
+    // Print the generated systemd unit if requested
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1 && &args[1] == "-service-config" {
+        println!("{}", generate_service_config(&config));
+    }
+
     // Start with a base route that matches nothing
     let base = warp::any()
         .and(warp::path("help"))
         .map(|| {
             let config = load_config("config.json").expect("Failed to load config");
             let help = generate_curl_commands(&config);
-            Response::builder()
-                .status(200)
-                .body(help.into())
-                .unwrap()
+            Response::builder().status(200).body(help.into()).unwrap()
         })
         .boxed();
 
@@ -268,4 +300,3 @@ async fn main() {
     // Serve the API
     warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
 }
-
